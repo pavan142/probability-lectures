@@ -19,10 +19,24 @@ const DATA_TYPES: { value: string; label: string }[] = [
   { value: "innings", label: "Innings" },
 ];
 
+const INNINGS_FILTERS = [
+  {
+    id: "centuries",
+    label: "Centuries",
+    color: "bg-green-100 text-green-800 border-green-200",
+  },
+  {
+    id: "fifers",
+    label: "Fifers",
+    color: "bg-blue-100 text-blue-800 border-blue-200",
+  },
+];
+
 function App() {
   const [playerName, setPlayerName] = useState("");
   const [matchType, setMatchType] = useState<string>("odis");
   const [dataType, setDataType] = useState<string>("batsmen");
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [playerProfile, setPlayerProfile] = useState<PlayerProfile | null>(
     testPlayerProfiles[0]
   );
@@ -123,6 +137,15 @@ function App() {
     setPlayerProfile(null);
     setInningsData(null);
     setError(null);
+    setActiveFilters([]);
+  };
+
+  const toggleFilter = (filterId: string) => {
+    setActiveFilters((prev) =>
+      prev.includes(filterId)
+        ? prev.filter((id) => id !== filterId)
+        : [...prev, filterId]
+    );
   };
 
   // Get the appropriate stats based on match type
@@ -142,11 +165,27 @@ function App() {
     ? getInningsForMatchType(inningsData, matchType)
     : null;
 
+  // Filter innings data based on active filters
+  const getFilteredInningsData = () => {
+    if (!currentInnings) return [];
+
+    let filtered = currentInnings;
+
+    if (activeFilters.includes("centuries")) {
+      filtered = filtered.filter((inning) => inning.centuries > 0);
+    }
+
+    if (activeFilters.includes("fifers")) {
+      filtered = filtered.filter((inning) => inning.fifers > 0);
+    }
+
+    return filtered.map((inning) => inning.runs).filter((run) => run > 0);
+  };
+
   const battingData =
     dataType === "batsmen"
       ? currentStats?.runs.filter((run) => run > 0) || []
-      : currentInnings?.map((inning) => inning.runs).filter((run) => run > 0) ||
-        [];
+      : getFilteredInningsData();
 
   const displayName =
     dataType === "batsmen" ? playerProfile?.name : "All Innings";
@@ -234,6 +273,30 @@ function App() {
             </button>
           </div>
         </div>
+
+        {/* Filter tags - only show for innings */}
+        {dataType === "innings" && inningsData && (
+          <div className="px-4 pb-2">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-700">
+                Filters:
+              </span>
+              {INNINGS_FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => toggleFilter(filter.id)}
+                  className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                    activeFilters.includes(filter.id)
+                      ? filter.color
+                      : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Chart Content */}
         {((dataType === "batsmen" && playerProfile) ||

@@ -42,19 +42,19 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
     // Kernel density estimation with dynamic bandwidth
     const kde = kernelDensityEstimator(
       kernelEpanechnikov(newBandwidth),
-      d3.extent(runs) as [number, number]
+      [0, 500] // Fixed domain from 0 to 500
     );
     const densityData = kde(runs);
 
-    // Scales
+    // Fixed scales
     const xScale = d3
       .scaleLinear()
-      .domain(d3.extent(densityData, (d) => d[0]) as [number, number])
+      .domain([0, 500]) // Fixed x-axis range
       .range([0, chartWidth]);
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(densityData, (d) => d[1]) as number])
+      .domain([0, 0.030]) // Fixed y-axis range
       .range([chartHeight, 0]);
 
     // Add grid
@@ -124,8 +124,7 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
     g.append("text")
       .attr("class", "axis-label")
       .attr("x", chartWidth / 2)
-      .attr("y", chartHeight + 65)
-      // .attr("text-anchor", "middle")
+      .attr("y", chartHeight + 40)
       .style("font-size", "18px")
       .style("font-weight", "bold")
       .text("Runs");

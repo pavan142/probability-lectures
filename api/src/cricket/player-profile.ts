@@ -106,6 +106,14 @@ const buildPlayerProfile = ({
             }
           }
         });
+        innings.bowlers.forEach((bowler) => {
+          if (bowler.name === player_name) {
+            stats.wickets.push(bowler.wickets);
+            if (bowler.wickets >= 5) {
+              stats.fifers++;
+            }
+          }
+        });
       });
     });
 
@@ -183,7 +191,7 @@ export const getPlayerProfile = (playerName: string): PlayerProfile => {
 
 export const test = () => {
   // getAllPlayerNames();
-  const playerProfile = getPlayerProfile("RG Sharma");
+  const playerProfile = getPlayerProfile("JJ Bumrah");
   console.log(playerProfile);
 };
 

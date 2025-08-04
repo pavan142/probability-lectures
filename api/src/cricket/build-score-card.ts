@@ -31,7 +31,7 @@ const buildScoreCard = (matchData: MatchData): MatchScorecard => {
         const { over: overNumber, deliveries } = over;
 
         deliveries.forEach((delivery) => {
-          const { batter, bowler, runs } = delivery;
+          const { batter, bowler, runs, wickets } = delivery;
 
           // Update total runs and extras
           totalRuns += runs.total;
@@ -71,6 +71,10 @@ const buildScoreCard = (matchData: MatchData): MatchScorecard => {
 
           const bowlerStats = bowlersStats.get(bowler)!;
           bowlerStats.runs += runs.total;
+
+          if (wickets && wickets.length > 0 && wickets[0].kind !== "run out") {
+            bowlerStats.wickets++;
+          }
 
           // Calculate overs (assuming 6 balls per over)
           const completedOvers = Math.floor(totalBalls / 6);
@@ -192,7 +196,13 @@ export const processAllMatches = (
 };
 
 export const test = () => {
-  processAllMatches("tests_male");
+  const scoreCard = buildScoreCard(
+    JSON.parse(
+      fs.readFileSync("./datasets/cricket/tests_male_json/1448352.json", "utf8")
+    )
+  );
+  console.log(JSON.stringify(scoreCard, null, 2));
+  // processAllMatches("tests_male");
 };
 
 if (require.main === module) {

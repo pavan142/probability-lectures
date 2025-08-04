@@ -7,6 +7,11 @@ export type Delivery = {
     extras: number;
     total: number;
   };
+  wickets?: {
+    player_out: string;
+    kind: string;
+    fielders: string[];
+  }[];
 };
 
 export type Over = {
