@@ -1,18 +1,22 @@
-export interface PlayerProfile {
-  name: string;
+export type PlayerStats = {
   runs: number[];
   centuries: number;
   wickets: number[];
   fifers: number;
   maidens: number;
-  average: number;
+  average: number | null;
   total_runs: number;
   total_wickets: number;
-}
+};
 
-export type MatchType =
-  | "tests_male"
-  | "t20s_male"
-  | "odis_male"
-  | "ipl_male"
-  | "all_male";
+export type PlayerProfile = {
+  name: string;
+  gender: string;
+  stats: {
+    all: PlayerStats;
+    tests: PlayerStats;
+    t20s: PlayerStats;
+    odis: PlayerStats;
+    ipl: PlayerStats;
+  };
+};

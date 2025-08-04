@@ -1,31 +1,33 @@
 import { useState } from "react";
-import { PlayerProfile, MatchType } from "./types/api";
+import { PlayerProfile } from "./types/api";
 import { getPlayerProfile } from "./services/api";
 import { RunsDistributionChart } from "./components/RunsDistributionChart";
-import { PlayerStats } from "./components/PlayerStats";
 import { LoadingSpinner } from "./components/LoadingSpinner";
-import { testPlayerProfile } from "./testData";
+import { testPlayerProfiles } from "./testData";
+import { players } from "./players";
 
-const MATCH_TYPES: { value: MatchType; label: string }[] = [
-  { value: "tests_male", label: "Test Matches" },
-  { value: "t20s_male", label: "T20 Matches" },
-  { value: "odis_male", label: "ODI Matches" },
-  { value: "ipl_male", label: "IPL Matches" },
-  { value: "all_male", label: "All Matches" },
+const MATCH_TYPES: { value: string; label: string }[] = [
+  { value: "tests", label: "Test Matches" },
+  { value: "t20s", label: "T20 Matches" },
+  { value: "odis", label: "ODI Matches" },
+  { value: "ipl", label: "IPL Matches" },
+  { value: "all", label: "All Matches" },
 ];
 
 function App() {
   const [playerName, setPlayerName] = useState("");
-  const [matchType, setMatchType] = useState<MatchType>("ipl_male");
+  const [selectedPlayer, setSelectedPlayer] = useState("");
+  const [matchType, setMatchType] = useState<string>("odis");
   const [playerProfile, setPlayerProfile] = useState<PlayerProfile | null>(
-    testPlayerProfile
+    testPlayerProfiles[0]
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async () => {
-    if (!playerName.trim()) {
-      setError("Please enter a player name");
+    const searchName = selectedPlayer || playerName.trim();
+    if (!searchName) {
+      setError("Please enter a player name or select from the dropdown");
       return;
     }
 
@@ -33,7 +35,8 @@ function App() {
     setError(null);
 
     try {
-      const profile = await getPlayerProfile(playerName.trim(), matchType);
+      const profile = await getPlayerProfile(searchName);
+      console.log(profile);
       setPlayerProfile(profile);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -43,7 +46,20 @@ function App() {
     }
   };
 
-  const battingData = playerProfile?.runs.filter((run) => run > 0) || [];
+  const handlePlayerSelect = (player: string) => {
+    setSelectedPlayer(player);
+    setPlayerName(player);
+  };
+
+  // Get the appropriate stats based on match type
+  const getStatsForMatchType = (profile: PlayerProfile, matchType: string) => {
+    return profile.stats[matchType as keyof PlayerProfile["stats"]];
+  };
+
+  const currentStats = playerProfile
+    ? getStatsForMatchType(playerProfile, matchType)
+    : null;
+  const battingData = currentStats?.runs.filter((run) => run > 0) || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -69,6 +85,28 @@ function App() {
               />
             </div>
 
+            <div className="md:w-64">
+              <label
+                htmlFor="playerDropdown"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Select Player
+              </label>
+              <select
+                id="playerDropdown"
+                value={selectedPlayer}
+                onChange={(e) => handlePlayerSelect(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cricket-500 focus:border-transparent"
+              >
+                <option value="">Select a player...</option>
+                {players.map((player) => (
+                  <option key={player} value={player}>
+                    {player}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="md:w-48">
               <label
                 htmlFor="matchType"
@@ -79,7 +117,7 @@ function App() {
               <select
                 id="matchType"
                 value={matchType}
-                onChange={(e) => setMatchType(e.target.value as MatchType)}
+                onChange={(e) => setMatchType(e.target.value as string)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cricket-500 focus:border-transparent"
               >
                 {MATCH_TYPES.map((type) => (
