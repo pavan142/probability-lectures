@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { PlayerProfile } from "./types/api";
 import { getPlayerProfile } from "./services/api";
 import { RunsDistributionChart } from "./components/RunsDistributionChart";
@@ -16,26 +16,64 @@ const MATCH_TYPES: { value: string; label: string }[] = [
 
 function App() {
   const [playerName, setPlayerName] = useState("");
-  const [selectedPlayer, setSelectedPlayer] = useState("");
   const [matchType, setMatchType] = useState<string>("odis");
   const [playerProfile, setPlayerProfile] = useState<PlayerProfile | null>(
     testPlayerProfiles[0]
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [filteredPlayers, setFilteredPlayers] = useState<string[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Filter players based on input
+  useEffect(() => {
+    if (playerName.trim()) {
+      const filtered = players
+        .filter((player) =>
+          player.toLowerCase().includes(playerName.toLowerCase())
+        )
+        .slice(0, 10); // Limit to 10 results
+      setFilteredPlayers(filtered);
+      setShowDropdown(filtered.length > 0);
+    } else {
+      setFilteredPlayers([]);
+      setShowDropdown(false);
+    }
+  }, [playerName]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSearch = async () => {
-    const searchName = selectedPlayer || playerName.trim();
-    if (!searchName) {
-      setError("Please enter a player name or select from the dropdown");
+    if (!playerName.trim()) {
+      setError("Please enter a player name");
       return;
     }
 
     setLoading(true);
     setError(null);
+    setShowDropdown(false);
 
     try {
-      const profile = await getPlayerProfile(searchName);
+      const profile = await getPlayerProfile(playerName);
       console.log(profile);
       setPlayerProfile(profile);
     } catch (err) {
@@ -47,8 +85,19 @@ function App() {
   };
 
   const handlePlayerSelect = (player: string) => {
-    setSelectedPlayer(player);
     setPlayerName(player);
+    setShowDropdown(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPlayerName(e.target.value);
+    setError(null);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   // Get the appropriate stats based on match type
@@ -67,44 +116,41 @@ function App() {
         {/* Search Form */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
+            <div className="flex-1 relative">
               <label
                 htmlFor="playerName"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
                 Player Name
               </label>
-              <input
-                id="playerName"
-                type="text"
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-                placeholder="Enter player name (e.g., Virat Kohli)"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cricket-500 focus:border-transparent"
-                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-              />
-            </div>
-
-            <div className="md:w-64">
-              <label
-                htmlFor="playerDropdown"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Select Player
-              </label>
-              <select
-                id="playerDropdown"
-                value={selectedPlayer}
-                onChange={(e) => handlePlayerSelect(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cricket-500 focus:border-transparent"
-              >
-                <option value="">Select a player...</option>
-                {players.map((player) => (
-                  <option key={player} value={player}>
-                    {player}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  ref={inputRef}
+                  id="playerName"
+                  type="text"
+                  value={playerName}
+                  onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Enter player name (e.g., Virat Kohli)"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cricket-500 focus:border-transparent"
+                />
+                {showDropdown && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
+                  >
+                    {filteredPlayers.map((player) => (
+                      <div
+                        key={player}
+                        onClick={() => handlePlayerSelect(player)}
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                      >
+                        {player}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="md:w-48">
