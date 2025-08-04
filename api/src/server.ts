@@ -1,8 +1,22 @@
 import express from "express";
+import cors from "cors";
 import { buildPlayerProfile } from "./cricket/player-profile";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// Enable CORS for all routes
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // Allow frontend origins
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Parse JSON bodies
+app.use(express.json());
 
 // API Routes
 app.get("/player/:player_name/:match_type", (req, res) => {

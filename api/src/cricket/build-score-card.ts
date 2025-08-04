@@ -26,57 +26,59 @@ const buildScoreCard = (matchData: MatchData): MatchScorecard => {
     let totalWickets = 0;
 
     // Process each over
-    overs.forEach((over) => {
-      const { over: overNumber, deliveries } = over;
+    if (overs) {
+      overs.forEach((over) => {
+        const { over: overNumber, deliveries } = over;
 
-      deliveries.forEach((delivery) => {
-        const { batter, bowler, runs } = delivery;
+        deliveries.forEach((delivery) => {
+          const { batter, bowler, runs } = delivery;
 
-        // Update total runs and extras
-        totalRuns += runs.total;
-        totalExtras += runs.extras;
-        totalBalls++;
+          // Update total runs and extras
+          totalRuns += runs.total;
+          totalExtras += runs.extras;
+          totalBalls++;
 
-        // Update batsman statistics
-        if (!batsmenStats.has(batter)) {
-          batsmenStats.set(batter, {
-            name: batter,
-            runs: 0,
-            balls: 0,
-            fours: 0,
-            sixes: 0,
-            strike_rate: 0,
-          });
-        }
+          // Update batsman statistics
+          if (!batsmenStats.has(batter)) {
+            batsmenStats.set(batter, {
+              name: batter,
+              runs: 0,
+              balls: 0,
+              fours: 0,
+              sixes: 0,
+              strike_rate: 0,
+            });
+          }
 
-        const batsman = batsmenStats.get(batter)!;
-        batsman.runs += runs.batter;
-        batsman.balls++;
+          const batsman = batsmenStats.get(batter)!;
+          batsman.runs += runs.batter;
+          batsman.balls++;
 
-        // Count boundaries
-        if (runs.batter === 4) batsman.fours++;
-        if (runs.batter === 6) batsman.sixes++;
+          // Count boundaries
+          if (runs.batter === 4) batsman.fours++;
+          if (runs.batter === 6) batsman.sixes++;
 
-        // Update bowler statistics
-        if (!bowlersStats.has(bowler)) {
-          bowlersStats.set(bowler, {
-            name: bowler,
-            overs: 0,
-            maidens: 0,
-            runs: 0,
-            wickets: 0,
-          });
-        }
+          // Update bowler statistics
+          if (!bowlersStats.has(bowler)) {
+            bowlersStats.set(bowler, {
+              name: bowler,
+              overs: 0,
+              maidens: 0,
+              runs: 0,
+              wickets: 0,
+            });
+          }
 
-        const bowlerStats = bowlersStats.get(bowler)!;
-        bowlerStats.runs += runs.total;
+          const bowlerStats = bowlersStats.get(bowler)!;
+          bowlerStats.runs += runs.total;
 
-        // Calculate overs (assuming 6 balls per over)
-        const completedOvers = Math.floor(totalBalls / 6);
-        const remainingBalls = totalBalls % 6;
-        bowlerStats.overs = completedOvers + remainingBalls / 10; // Decimal format for overs
+          // Calculate overs (assuming 6 balls per over)
+          const completedOvers = Math.floor(totalBalls / 6);
+          const remainingBalls = totalBalls % 6;
+          bowlerStats.overs = completedOvers + remainingBalls / 10; // Decimal format for overs
+        });
       });
-    });
+    }
 
     // Calculate strike rates for batsmen
     batsmenStats.forEach((batsman) => {
@@ -129,7 +131,7 @@ export const processMatch = (
 ): MatchScorecard => {
   const startTime = Date.now();
   const processedFilePath = path.join(
-    "./datasets/cricket/processed",
+    "./datasets/cricket/processed/matches",
     match_type,
     `${match_id}.json`
   );
