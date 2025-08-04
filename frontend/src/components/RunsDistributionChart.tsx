@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 
 interface RunsDistributionChartProps {
@@ -13,8 +13,9 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
   height = 400,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
+  const [bandwidth, setBandwidth] = useState(7);
 
-  useEffect(() => {
+  const updateChart = (newBandwidth: number) => {
     if (!data.length || !svgRef.current) return;
 
     // Clear previous chart
@@ -24,7 +25,8 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
 
     if (runs.length === 0) return;
 
-    const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+    // Much larger margins to prevent cutoff
+    const margin = { top: 50, right: 50, bottom: 80, left: 80 };
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
 
@@ -37,9 +39,9 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Kernel density estimation
+    // Kernel density estimation with dynamic bandwidth
     const kde = kernelDensityEstimator(
-      kernelEpanechnikov(7),
+      kernelEpanechnikov(newBandwidth),
       d3.extent(runs) as [number, number]
     );
     const densityData = kde(runs);
@@ -114,7 +116,7 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
       .append("text")
       .attr("class", "axis-label")
       .attr("x", chartWidth / 2)
-      .attr("y", 35)
+      .attr("y", 50)
       .attr("text-anchor", "middle")
       .text("Runs");
 
@@ -123,7 +125,7 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
       .append("text")
       .attr("class", "axis-label")
       .attr("transform", "rotate(-90)")
-      .attr("y", -40)
+      .attr("y", -50)
       .attr("x", -chartHeight / 2)
       .attr("text-anchor", "middle")
       .text("Probability Density");
@@ -135,12 +137,14 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
 
     g.append("text")
       .attr("x", 10)
-      .attr("y", 20)
+      .attr("y", -20)
       .attr("class", "text-sm fill-gray-600")
       .text(
         `Mean: ${mean.toFixed(1)} | Median: ${median.toFixed(
           1
-        )} | Std Dev: ${stdDev.toFixed(1)}`
+        )} | Std Dev: ${stdDev.toFixed(1)} | Bandwidth: ${newBandwidth.toFixed(
+          1
+        )}`
       );
 
     // Add mean line
@@ -156,14 +160,55 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
 
     g.append("text")
       .attr("x", xScale(mean) + 5)
-      .attr("y", 15)
+      .attr("y", -25)
       .attr("class", "text-xs fill-red-500")
       .text("Mean");
-  }, [data, width, height]);
+  };
+
+  useEffect(() => {
+    updateChart(bandwidth);
+  }, [data, width, height, bandwidth]);
+
+  const handleBandwidthChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newBandwidth = parseFloat(event.target.value);
+    setBandwidth(newBandwidth);
+  };
 
   return (
-    <div className="chart-container">
-      <svg ref={svgRef}></svg>
+    <div className="chart-container h-full flex flex-col">
+      {/* <div className="mb-3 flex-shrink-0">
+        <label
+          htmlFor="bandwidth-slider"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Kernel Bandwidth: {bandwidth.toFixed(1)}
+        </label>
+        <div className="flex items-center space-x-4">
+          <input
+            id="bandwidth-slider"
+            type="range"
+            min="0.5"
+            max="20"
+            step="0.5"
+            value={bandwidth}
+            onChange={handleBandwidthChange}
+            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+          />
+          <div className="text-xs text-gray-500 w-16">
+            <div>Discrete</div>
+            <div className="text-right">Smooth</div>
+          </div>
+        </div>
+        <div className="text-xs text-gray-500 mt-1">
+          Lower values show discrete spikes, higher values create smoother
+          curves
+        </div>
+      </div> */}
+      <div className="flex-1 min-h-0">
+        <svg ref={svgRef} className="w-full h-full"></svg>
+      </div>
     </div>
   );
 };
