@@ -20,3 +20,20 @@ export type PlayerProfile = {
     ipl: PlayerStats;
   };
 };
+
+export type InningsStats = {
+  runs: number;
+  wickets: number;
+  overs: number;
+  balls: number;
+  centuries: number;
+  fifers: number;
+};
+
+export type InningsData = {
+  all: InningsStats[];
+  tests: InningsStats[];
+  t20s: InningsStats[];
+  odis: InningsStats[];
+  ipl: InningsStats[];
+};

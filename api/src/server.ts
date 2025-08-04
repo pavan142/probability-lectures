@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { getAllPlayerNames, getPlayerProfile } from "./cricket/player-profile";
+import { getInningsStats } from "./cricket/innings-stats";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -25,6 +26,19 @@ app.get("/players", (req, res) => {
     res.json(playerNames);
   } catch (error) {
     console.error("Error getting all player names:", error);
+    res.status(500).json({
+      error: "Internal server error",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
+app.get("/innings", (req, res) => {
+  try {
+    const inningsData = getInningsStats();
+    res.json(inningsData);
+  } catch (error) {
+    console.error("Error getting innings stats:", error);
     res.status(500).json({
       error: "Internal server error",
       message: error instanceof Error ? error.message : "Unknown error",
