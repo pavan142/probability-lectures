@@ -112,22 +112,32 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
     // Add axes
     g.append("g")
       .attr("transform", `translate(0,${chartHeight})`)
-      .call(d3.axisBottom(xScale))
-      .append("text")
-      .attr("class", "axis-label")
-      .attr("x", chartWidth / 2)
-      .attr("y", 50)
-      .attr("text-anchor", "middle")
-      .text("Runs");
+      .call(d3.axisBottom(xScale).tickSize(6).tickPadding(8))
+      .selectAll("text")
+      .style("font-size", "12px");
 
     g.append("g")
-      .call(d3.axisLeft(yScale))
-      .append("text")
+      .call(d3.axisLeft(yScale).tickSize(6).tickPadding(8))
+      .selectAll("text")
+      .style("font-size", "12px");
+
+    g.append("text")
+      .attr("class", "axis-label")
+      .attr("x", chartWidth / 2)
+      .attr("y", chartHeight + 65)
+      // .attr("text-anchor", "middle")
+      .style("font-size", "18px")
+      .style("font-weight", "bold")
+      .text("Runs");
+
+    g.append("text")
       .attr("class", "axis-label")
       .attr("transform", "rotate(-90)")
-      .attr("y", -50)
+      .attr("y", -65)
       .attr("x", -chartHeight / 2)
       .attr("text-anchor", "middle")
+      .style("font-size", "18px")
+      .style("font-weight", "bold")
       .text("Probability Density");
 
     // Add statistics
@@ -138,13 +148,13 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
     g.append("text")
       .attr("x", 10)
       .attr("y", -20)
-      .attr("class", "text-sm fill-gray-600")
+      .style("font-size", "16px")
+      .style("font-weight", "500")
+      .style("fill", "#374151")
       .text(
         `Mean: ${mean.toFixed(1)} | Median: ${median.toFixed(
           1
-        )} | Std Dev: ${stdDev.toFixed(1)} | Bandwidth: ${newBandwidth.toFixed(
-          1
-        )}`
+        )} | Std Dev: ${stdDev.toFixed(1)}`
       );
 
     // Add mean line
@@ -160,8 +170,11 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
 
     g.append("text")
       .attr("x", xScale(mean) + 5)
-      .attr("y", -25)
-      .attr("class", "text-xs fill-red-500")
+      .attr("y", chartHeight / 2)
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .style("fill", "#ef4444")
+      .attr("text-anchor", "start")
       .text("Mean");
   };
 

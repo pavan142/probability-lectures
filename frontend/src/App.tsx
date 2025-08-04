@@ -187,14 +187,14 @@ function App() {
         {playerProfile && battingData.length > 0 ? (
           <div className="flex-1 flex flex-col p-4 pt-0">
             <div className="mb-4">
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              <h1 className="text-[40px] font-bold text-gray-900 mb-1 ml-[72px]">
                 {playerProfile.name} -{" "}
                 {MATCH_TYPES.find((t) => t.value === matchType)?.label}
               </h1>
-              <p className="text-gray-600 text-sm">
+              {/* <p className="text-gray-600 text-sm">
                 Probability distribution of runs scored across{" "}
                 {battingData.length} innings
-              </p>
+              </p> */}
             </div>
             <div className="flex-1 min-h-0">
               <RunsDistributionChart
