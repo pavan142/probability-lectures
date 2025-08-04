@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { PlayerProfile } from "./types/api";
-import { getPlayerProfile } from "./services/api";
+import { PlayerProfile, InningsData } from "./types/api";
+import { getPlayerProfile, getInningsData } from "./services/api";
 import { RunsDistributionChart } from "./components/RunsDistributionChart";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { testPlayerProfiles } from "./testData";
@@ -14,12 +14,19 @@ const MATCH_TYPES: { value: string; label: string }[] = [
   { value: "all", label: "All" },
 ];
 
+const DATA_TYPES: { value: string; label: string }[] = [
+  { value: "batsmen", label: "Batsmen" },
+  { value: "innings", label: "Innings" },
+];
+
 function App() {
   const [playerName, setPlayerName] = useState("");
   const [matchType, setMatchType] = useState<string>("odis");
+  const [dataType, setDataType] = useState<string>("batsmen");
   const [playerProfile, setPlayerProfile] = useState<PlayerProfile | null>(
     testPlayerProfiles[0]
   );
+  const [inningsData, setInningsData] = useState<InningsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -34,7 +41,7 @@ function App() {
         .filter((player) =>
           player.toLowerCase().includes(playerName.toLowerCase())
         )
-        .slice(0, 8); // Limit to 8 results for compact dropdown
+        .slice(0, 8);
       setFilteredPlayers(filtered);
       setShowDropdown(filtered.length > 0);
     } else {
@@ -63,22 +70,28 @@ function App() {
   }, []);
 
   const handleSearch = async () => {
-    if (!playerName.trim()) {
-      setError("Please enter a player name");
-      return;
-    }
-
     setLoading(true);
     setError(null);
     setShowDropdown(false);
 
     try {
-      const profile = await getPlayerProfile(playerName);
-      console.log(profile);
-      setPlayerProfile(profile);
+      if (dataType === "batsmen") {
+        if (!playerName.trim()) {
+          setError("Please enter a player name");
+          return;
+        }
+        const profile = await getPlayerProfile(playerName);
+        setPlayerProfile(profile);
+        setInningsData(null);
+      } else {
+        const innings = await getInningsData();
+        setInningsData(innings);
+        setPlayerProfile(null);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       setPlayerProfile(null);
+      setInningsData(null);
     } finally {
       setLoading(false);
     }
@@ -104,15 +117,39 @@ function App() {
     setMatchType(e.target.value);
   };
 
+  const handleDataTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setDataType(e.target.value);
+    // Clear current data when switching types
+    setPlayerProfile(null);
+    setInningsData(null);
+    setError(null);
+  };
+
   // Get the appropriate stats based on match type
   const getStatsForMatchType = (profile: PlayerProfile, matchType: string) => {
     return profile.stats[matchType as keyof PlayerProfile["stats"]];
   };
 
+  const getInningsForMatchType = (data: InningsData, matchType: string) => {
+    return data[matchType as keyof InningsData];
+  };
+
   const currentStats = playerProfile
     ? getStatsForMatchType(playerProfile, matchType)
     : null;
-  const battingData = currentStats?.runs.filter((run) => run > 0) || [];
+
+  const currentInnings = inningsData
+    ? getInningsForMatchType(inningsData, matchType)
+    : null;
+
+  const battingData =
+    dataType === "batsmen"
+      ? currentStats?.runs.filter((run) => run > 0) || []
+      : currentInnings?.map((inning) => inning.runs).filter((run) => run > 0) ||
+        [];
+
+  const displayName =
+    dataType === "batsmen" ? playerProfile?.name : "All Innings";
 
   return (
     <div className="h-screen bg-gray-50 p-4 overflow-hidden">
@@ -130,34 +167,49 @@ function App() {
         {/* Controls in top right */}
         <div className="flex justify-end p-4 pb-2">
           <div className="flex items-center space-x-3">
-            {/* Player dropdown */}
-            <div className="relative">
-              <input
-                ref={inputRef}
-                type="text"
-                value={playerName}
-                onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
-                placeholder="Search player..."
-                className="w-48 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cricket-500 focus:border-transparent"
-              />
-              {showDropdown && (
-                <div
-                  ref={dropdownRef}
-                  className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto"
-                >
-                  {filteredPlayers.map((player) => (
-                    <div
-                      key={player}
-                      onClick={() => handlePlayerSelect(player)}
-                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                    >
-                      {player}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Data type dropdown */}
+            <select
+              value={dataType}
+              onChange={handleDataTypeChange}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cricket-500 focus:border-transparent bg-white"
+            >
+              {DATA_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
+            </select>
+
+            {/* Player dropdown - only show for batsmen */}
+            {dataType === "batsmen" && (
+              <div className="relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={playerName}
+                  onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Search player..."
+                  className="w-48 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cricket-500 focus:border-transparent"
+                />
+                {showDropdown && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto"
+                  >
+                    {filteredPlayers.map((player) => (
+                      <div
+                        key={player}
+                        onClick={() => handlePlayerSelect(player)}
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                      >
+                        {player}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Match type dropdown */}
             <select
@@ -178,23 +230,21 @@ function App() {
               disabled={loading}
               className="px-4 py-2 bg-cricket-600 text-white text-sm rounded-md hover:bg-cricket-700 focus:outline-none focus:ring-2 focus:ring-cricket-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? <LoadingSpinner /> : "Search"}
+              {loading ? <LoadingSpinner /> : "Analyze"}
             </button>
           </div>
         </div>
 
         {/* Chart Content */}
-        {playerProfile && battingData.length > 0 ? (
+        {((dataType === "batsmen" && playerProfile) ||
+          (dataType === "innings" && inningsData)) &&
+        battingData.length > 0 ? (
           <div className="flex-1 flex flex-col p-4 pt-0">
             <div className="mb-4">
               <h1 className="text-[40px] font-bold text-gray-900 mb-1 ml-[72px]">
-                {playerProfile.name} -{" "}
+                {displayName} -{" "}
                 {MATCH_TYPES.find((t) => t.value === matchType)?.label}
               </h1>
-              {/* <p className="text-gray-600 text-sm">
-                Probability distribution of runs scored across{" "}
-                {battingData.length} innings
-              </p> */}
             </div>
             <div className="flex-1 min-h-0">
               <RunsDistributionChart
@@ -209,7 +259,9 @@ function App() {
             <div className="text-gray-500 text-center">
               <h3 className="text-xl font-medium mb-2">No Data Available</h3>
               <p className="text-sm">
-                Search for a player to see their runs distribution analysis
+                {dataType === "batsmen"
+                  ? "Search for a player to see their runs distribution analysis"
+                  : "Click Search to see innings distribution analysis"}
               </p>
             </div>
           </div>

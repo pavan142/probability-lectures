@@ -1,5 +1,5 @@
 import axios from "axios";
-import { PlayerProfile } from "../types/api";
+import { PlayerProfile, InningsData } from "../types/api";
 
 export const api = axios.create({
   baseURL: "http://localhost:4000",
@@ -19,6 +19,20 @@ export const getPlayerProfile = async (
       }
       throw new Error(
         error.response?.data?.message || "Failed to fetch player data"
+      );
+    }
+    throw new Error("Network error");
+  }
+};
+
+export const getInningsData = async (): Promise<InningsData> => {
+  try {
+    const response = await api.get("/innings");
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch innings data"
       );
     }
     throw new Error("Network error");
