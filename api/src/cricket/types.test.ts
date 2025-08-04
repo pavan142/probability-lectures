@@ -1,4 +1,4 @@
-import { MatchData } from "./types";
+import { MatchData } from "./data-types";
 
 const testMatchData: MatchData = {
   meta: {
