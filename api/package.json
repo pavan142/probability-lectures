@@ -8,7 +8,7 @@
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
     "watch": "tsc --watch",
-    "setup": "npm run build && node setup.js"
+    "setup": "npm install && npm run build && node setup.js"
   },
   "keywords": [
     "typescript",
