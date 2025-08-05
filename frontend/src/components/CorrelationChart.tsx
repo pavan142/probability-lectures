@@ -170,46 +170,51 @@ export const CorrelationChart: React.FC<CorrelationChartProps> = ({
         g.selectAll(".tooltip").remove();
       });
 
-    // Calculate correlation coefficient
+    // Calculate correlation coefficient and covariance
     const correlation = calculateCorrelation(validData, xAxis, yAxis);
+    const covariance = calculateCovariance(validData, xAxis, yAxis);
 
-    // Add correlation info
+    // Add correlation and covariance info
     g.append("text")
       .attr("x", 10)
       .attr("y", -20)
       .style("font-size", "16px")
       .style("font-weight", "500")
       .style("fill", "#374151")
-      .text(`Correlation: ${correlation.toFixed(3)}`);
-
-    // Add trend line if correlation is significant
-    if (Math.abs(correlation) > 0.1) {
-      const trendLine = calculateTrendLine(
-        validData,
-        xAxis,
-        yAxis,
-        xScale,
-        yScale
+      .text(
+        `Correlation: ${correlation.toFixed(
+          3
+        )} | Covariance: ${covariance.toFixed(3)}`
       );
 
-      g.append("line")
-        .attr("x1", trendLine.x1)
-        .attr("x2", trendLine.x2)
-        .attr("y1", trendLine.y1)
-        .attr("y2", trendLine.y2)
-        .attr("stroke", "#ef4444")
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "5,5")
-        .attr("opacity", 0.7);
+    // Add trend line if correlation is significant
+    // if (Math.abs(correlation) > 0.1) {
+    //   const trendLine = calculateTrendLine(
+    //     validData,
+    //     xAxis,
+    //     yAxis,
+    //     xScale,
+    //     yScale
+    //   );
 
-      g.append("text")
-        .attr("x", trendLine.x2 + 5)
-        .attr("y", trendLine.y2)
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .style("fill", "#ef4444")
-        .text("Trend Line");
-    }
+    //   g.append("line")
+    //     .attr("x1", trendLine.x1)
+    //     .attr("x2", trendLine.x2)
+    //     .attr("y1", trendLine.y1)
+    //     .attr("y2", trendLine.y2)
+    //     .attr("stroke", "#ef4444")
+    //     .attr("stroke-width", 2)
+    //     .attr("stroke-dasharray", "5,5")
+    //     .attr("opacity", 0.7);
+
+    //   g.append("text")
+    //     .attr("x", trendLine.x2 + 5)
+    //     .attr("y", trendLine.y2)
+    //     .style("font-size", "14px")
+    //     .style("font-weight", "bold")
+    //     .style("fill", "#ef4444")
+    //     .text("Trend Line");
+    // }
   };
 
   useEffect(() => {
@@ -297,6 +302,31 @@ function calculateCorrelation(
   );
 
   return denominator === 0 ? 0 : numerator / denominator;
+}
+
+// Helper function to calculate covariance
+function calculateCovariance(
+  data: InningsStats[],
+  xAxis: AxisOption,
+  yAxis: AxisOption
+): number {
+  const n = data.length;
+  const sumX = d3.sum(data, (d) => d[xAxis as keyof InningsStats] as number);
+  const sumY = d3.sum(data, (d) => d[yAxis as keyof InningsStats] as number);
+  const sumXY = d3.sum(
+    data,
+    (d) =>
+      (d[xAxis as keyof InningsStats] as number) *
+      (d[yAxis as keyof InningsStats] as number)
+  );
+
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+
+  // Calculate covariance: E[(X - μX)(Y - μY)]
+  const covariance = sumXY / n - meanX * meanY;
+
+  return covariance;
 }
 
 // Helper function to calculate trend line
