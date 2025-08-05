@@ -151,13 +151,16 @@ export const getAllPlayerNames = (): string[] => {
     return JSON.parse(fs.readFileSync(allPlayersFilePath, "utf8"));
   }
   const playerNames = new Set<string>();
-  processAllMatches("all_male", (matchData) => {
-    matchData.innings.forEach((innings) => {
-      innings.batsmen.forEach((batsman) => {
-        playerNames.add(batsman.name);
-      });
-      innings.bowlers.forEach((bowler) => {
-        playerNames.add(bowler.name);
+  const matchTypes = ["tests", "t20s", "odis", "ipl"];
+  matchTypes.forEach((matchType) => {
+    processAllMatches(`${matchType}_male`, (matchData) => {
+      matchData.innings.forEach((innings) => {
+        innings.batsmen.forEach((batsman) => {
+          playerNames.add(batsman.name);
+        });
+        innings.bowlers.forEach((bowler) => {
+          playerNames.add(bowler.name);
+        });
       });
     });
   });

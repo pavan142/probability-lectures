@@ -4,11 +4,12 @@
   "description": "A TypeScript Node.js backend project",
   "main": "dist/main.js",
   "scripts": {
+    "prebuild": "npm install",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "npm run build && node dist/server.js",
     "dev": "ts-node src/server.ts",
     "watch": "tsc --watch",
-    "setup": "npm install && npm run build && node setup.js"
+    "setup": "npm run build && node dist/setup.js"
   },
   "keywords": [
     "typescript",
