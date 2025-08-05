@@ -152,6 +152,8 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
     const processedMean = d3.mean(processedData) as number;
     const processedMedian = d3.median(processedData) as number;
     const processedStdDev = d3.deviation(processedData) as number;
+    const skewness = calculateSkewness(processedData);
+    const kurtosis = calculateKurtosis(processedData);
 
     g.append("text")
       .attr("x", 10)
@@ -162,7 +164,11 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
       .text(
         `Mean: ${processedMean.toFixed(3)} | Median: ${processedMedian.toFixed(
           3
-        )} | Std Dev: ${processedStdDev.toFixed(3)}`
+        )} | Std Dev: ${processedStdDev.toFixed(
+          3
+        )} | Skewness: ${skewness.toFixed(3)} | Kurtosis: ${kurtosis.toFixed(
+          3
+        )}`
       );
 
     // Add mean line
@@ -253,4 +259,28 @@ function kernelEpanechnikov(K: number) {
       ? (0.75 * (1 - normalized * normalized)) / K
       : 0;
   };
+}
+
+// Helper function to calculate skewness
+function calculateSkewness(data: number[]): number {
+  const n = data.length;
+  const mean = d3.mean(data) as number;
+  const stdDev = d3.deviation(data) as number;
+
+  if (stdDev === 0) return 0;
+
+  const sumCubed = d3.sum(data, (x) => Math.pow((x - mean) / stdDev, 3));
+  return sumCubed / n;
+}
+
+// Helper function to calculate kurtosis
+function calculateKurtosis(data: number[]): number {
+  const n = data.length;
+  const mean = d3.mean(data) as number;
+  const stdDev = d3.deviation(data) as number;
+
+  if (stdDev === 0) return 0;
+
+  const sumFourth = d3.sum(data, (x) => Math.pow((x - mean) / stdDev, 4));
+  return sumFourth / n - 3; // Subtract 3 for excess kurtosis
 }
