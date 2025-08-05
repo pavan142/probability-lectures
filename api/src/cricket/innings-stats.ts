@@ -7,6 +7,13 @@ export type InningsStats = {
   balls: number;
   centuries: number;
   fifers: number;
+  highest_score: number;
+  lowest_score: number;
+  max_wickets: number;
+  min_wickets: number;
+  total_extras: number;
+  total_boundaries: number;
+  runs_per_over: number;
 };
 
 export type InningsData = {
@@ -40,6 +47,28 @@ export const getInningsStats = (): InningsData => {
             .length,
           fifers: innings.bowlers.filter((bowler) => bowler.wickets >= 5)
             .length,
+          highest_score: innings.batsmen.reduce(
+            (max, batsman) => Math.max(max, batsman.runs),
+            0
+          ),
+          lowest_score: innings.batsmen.reduce(
+            (min, batsman) => Math.min(min, batsman.runs),
+            Infinity
+          ),
+          max_wickets: innings.bowlers.reduce(
+            (max, bowler) => Math.max(max, bowler.wickets),
+            0
+          ),
+          min_wickets: innings.bowlers.reduce(
+            (min, bowler) => Math.min(min, bowler.wickets),
+            Infinity
+          ),
+          total_extras: innings.total_extras,
+          total_boundaries: innings.batsmen.reduce(
+            (acc, batsman) => acc + batsman.fours + batsman.sixes,
+            0
+          ),
+          runs_per_over: innings.total_runs / innings.total_overs,
         };
         stats.push(inningsStats);
       });

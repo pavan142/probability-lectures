@@ -28,6 +28,13 @@ export type InningsStats = {
   balls: number;
   centuries: number;
   fifers: number;
+  highest_score: number;
+  lowest_score: number;
+  max_wickets: number;
+  min_wickets: number;
+  total_extras: number;
+  total_boundaries: number;
+  runs_per_over: number;
 };
 
 export type InningsData = {

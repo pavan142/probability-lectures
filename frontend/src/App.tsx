@@ -5,6 +5,7 @@ import { RunsDistributionChart } from "./components/RunsDistributionChart";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { testPlayerProfiles } from "./testData";
 import { players } from "./players";
+import { CorrelationChart } from "./components/CorrelationChart";
 
 const MATCH_TYPES: { value: string; label: string }[] = [
   { value: "tests", label: "Tests" },
@@ -47,6 +48,9 @@ function App() {
   const [filteredPlayers, setFilteredPlayers] = useState<string[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [chartType, setChartType] = useState<"distribution" | "correlation">(
+    "distribution"
+  );
 
   // Filter players based on input
   useEffect(() => {
@@ -309,12 +313,58 @@ function App() {
                 {MATCH_TYPES.find((t) => t.value === matchType)?.label}
               </h1>
             </div>
+
+            {/* Chart Type Toggle - only show for innings */}
+            {dataType === "innings" && (
+              <div className="mb-4 ml-[72px]">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm font-medium text-gray-700">
+                    Chart Type:
+                  </span>
+                  <button
+                    onClick={() => setChartType("distribution")}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      chartType === "distribution"
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    Distribution
+                  </button>
+                  <button
+                    onClick={() => setChartType("correlation")}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      chartType === "correlation"
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    Correlation
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex-1 min-h-0">
-              <RunsDistributionChart
-                data={battingData}
-                width={window.innerWidth - 100}
-                height={window.innerHeight - 200}
-              />
+              {dataType === "batsmen" ? (
+                <RunsDistributionChart
+                  data={battingData}
+                  width={window.innerWidth - 100}
+                  height={window.innerHeight - 200}
+                />
+              ) : chartType === "distribution" ? (
+                <RunsDistributionChart
+                  data={battingData}
+                  width={window.innerWidth - 100}
+                  height={window.innerHeight - 200}
+                />
+              ) : (
+                <CorrelationChart
+                  data={currentInnings || []}
+                  width={window.innerWidth - 100}
+                  height={window.innerHeight - 200}
+                />
+              )}
             </div>
           </div>
         ) : (

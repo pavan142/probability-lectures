@@ -8,6 +8,7 @@
     "build": "tsc",
     "setup": "node dist/setup.js",
     "start": "npm run build && npm run setup && node dist/server.js",
+    "clean-processed": "rm -rf datasets/cricket/processed",
     "dev": "ts-node src/server.ts",
     "watch": "tsc --watch"
   },

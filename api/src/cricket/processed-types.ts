@@ -26,7 +26,7 @@ export type InningsScoreCard = {
   total_extras: number;
 };
 
-export const ScoreCardVersion = 2;
+export const ScoreCardVersion = 3;
 
 export type MatchScorecard = {
   version: number;
