@@ -9,6 +9,13 @@ export async function setupFolders() {
   try {
     console.log("Setting up dataset folder structure...");
 
+    // Check if datasets folder already exists
+    const datasetsPath = path.join(process.cwd(), "datasets");
+    if (fs.existsSync(datasetsPath)) {
+      console.log("datasets folder already exists, skipping setup...");
+      return;
+    }
+
     const zipFilePath = path.join(process.cwd(), "datasets.zip");
 
     if (!fs.existsSync(zipFilePath)) {

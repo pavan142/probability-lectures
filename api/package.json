@@ -6,10 +6,10 @@
   "scripts": {
     "prebuild": "npm install",
     "build": "tsc",
-    "start": "npm run build && node dist/server.js",
+    "setup": "node dist/setup.js",
+    "start": "npm run build && npm run setup && node dist/server.js",
     "dev": "ts-node src/server.ts",
-    "watch": "tsc --watch",
-    "setup": "npm run build && node dist/setup.js"
+    "watch": "tsc --watch"
   },
   "keywords": [
     "typescript",
