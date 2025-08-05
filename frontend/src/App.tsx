@@ -350,19 +350,19 @@ function App() {
                 <RunsDistributionChart
                   data={battingData}
                   width={window.innerWidth - 100}
-                  height={window.innerHeight - 200}
+                  height={window.innerHeight - 300}
                 />
               ) : chartType === "distribution" ? (
                 <RunsDistributionChart
                   data={battingData}
                   width={window.innerWidth - 100}
-                  height={window.innerHeight - 200}
+                  height={window.innerHeight - 300}
                 />
               ) : (
                 <CorrelationChart
                   data={currentInnings || []}
                   width={window.innerWidth - 100}
-                  height={window.innerHeight - 200}
+                  height={window.innerHeight - 300}
                 />
               )}
             </div>
