@@ -9,13 +9,6 @@ export async function setupFolders() {
   try {
     console.log("Setting up dataset folder structure...");
 
-    // Create datasets folder if it doesn't exist
-    const datasetsPath = path.join(process.cwd());
-    if (!fs.existsSync(datasetsPath)) {
-      fs.mkdirSync(datasetsPath, { recursive: true });
-      console.log("Created datasets folder");
-    }
-
     console.log("Extracting datasets.zip file...");
 
     const zipFilePath = path.join(process.cwd(), "datasets.zip");
