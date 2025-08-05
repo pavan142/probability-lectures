@@ -191,6 +191,26 @@ export const RunsDistributionChart: React.FC<RunsDistributionChartProps> = ({
       .attr("text-anchor", "start")
       .text("Mean");
 
+    // Add median line
+    g.append("line")
+      .attr("x1", xScale(processedMedian))
+      .attr("x2", xScale(processedMedian))
+      .attr("y1", 0)
+      .attr("y2", chartHeight)
+      .attr("stroke", "#10b981")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "3,3")
+      .attr("opacity", 0.7);
+
+    g.append("text")
+      .attr("x", xScale(processedMedian) + 5)
+      .attr("y", chartHeight / 2 + 20)
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .style("fill", "#10b981")
+      .attr("text-anchor", "start")
+      .text("Median");
+
     // Add standardization info if standardized
     if (isStandardized) {
       g.append("text")
