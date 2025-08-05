@@ -74,6 +74,7 @@ const buildScoreCard = (matchData: MatchData): MatchScorecard => {
 
           if (wickets && wickets.length > 0 && wickets[0].kind !== "run out") {
             bowlerStats.wickets++;
+            totalWickets++;
           }
 
           // Calculate overs (assuming 6 balls per over)

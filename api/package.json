@@ -10,6 +10,7 @@
     "start": "npm run build && npm run setup && node dist/server.js",
     "clean-processed": "rm -rf datasets/cricket/processed",
     "dev": "ts-node src/server.ts",
+    "reset": "npm run clean-processed",
     "watch": "tsc --watch"
   },
   "keywords": [

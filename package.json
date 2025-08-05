@@ -7,6 +7,7 @@
     "start": "npm install && concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:backend": "cd api && npm run start",
     "start:frontend": "cd frontend && npm run start",
+    "reset": "npm run clean:all && npm install && cd api && npm run reset && cd ../frontend && npm run reset",
     "clean": "rm -rf api/dist frontend/dist",
     "clean:all": "rm -rf node_modules api/node_modules frontend/node_modules api/dist frontend/dist"
   },
