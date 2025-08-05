@@ -25,30 +25,6 @@ export const genUncorrelatedDistribution = (numPoints: number = 50) => {
   return points;
 };
 
-export const genUncorrelatedDistribution = (numPoints: number = 50) => {
-    const points: { x: number; y: number }[] = [];
-    const radius = 5;
-    const centerX = 0;
-    const centerY = 0;
-  
-    for (let i = 0; i < numPoints; i++) {
-      // Generate random angle between 0 and 2π
-      const angle = Math.random() * 2 * Math.PI;
-  
-      // Generate random radius between 0 and 5 (uniform distribution within circle)
-      // Using square root for uniform distribution in area
-      const randomRadius = Math.sqrt(Math.random()) * radius;
-  
-      // Convert polar coordinates to Cartesian coordinates
-      const x = centerX + randomRadius * Math.cos(angle);
-      const y = centerY + randomRadius * Math.sin(angle);
-  
-      points.push({ x, y });
-    }
-  
-    return points;
-  };    
-
 export const genPositiveCorrelatedDistribution = (numPoints: number = 50) => {
   const points: { x: number; y: number }[] = [];
   const spread = 1.5; // Controls how spread out the points are from the line x=y
@@ -82,8 +58,8 @@ export const genNegativeCorrelatedDistribution = (numPoints: number = 50) => {
 
 export function main() {
   //   const points = genUncorrelatedDistribution(300);
-    const points = genPositiveCorrelatedDistribution(100);
-//   const points = genNegativeCorrelatedDistribution(100);
+  const points = genPositiveCorrelatedDistribution(100);
+  //   const points = genNegativeCorrelatedDistribution(100);
 
   const pointsText = printPoints(points);
 

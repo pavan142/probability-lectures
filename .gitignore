@@ -1,6 +1,9 @@
 lecture-images/
 
 datasets/
+datasets_old/
+datasets_raw/
+
 # Dependencies
 node_modules/
 npm-debug.log*
