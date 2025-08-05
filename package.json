@@ -1,0 +1,29 @@
+{
+  "name": "cricket-analytics-app",
+  "version": "1.0.0",
+  "description": "Cricket Player Analytics Application",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm install && concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd api && npm run start",
+    "start:frontend": "cd frontend && npm run start",
+    "clean": "rm -rf api/dist frontend/dist",
+    "clean:all": "rm -rf node_modules api/node_modules frontend/node_modules api/dist frontend/dist"
+  },
+  "keywords": [
+    "cricket",
+    "analytics",
+    "typescript",
+    "react",
+    "node"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
